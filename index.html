@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERIFIED BUILD: 24/7 FLOOD MONITORING V29 - MAINTENANCE MODE + TIMELINE-FIRST ORDER (BACKEND: CODE.GS V14) -->
+<!-- VERIFIED BUILD: 24/7 FLOOD MONITORING V30 - MAINTENANCE CHECKBOX START SECTION (BACKEND: CODE.GS V14) -->
 <html lang="en">
 <head>
   <base target="_top">
@@ -1122,7 +1122,7 @@
     /* ===== BOOTSTRAP FORM LOCK ===== */
   /* Sections 1-2 (timeline + height) stay usable while reference data
      loads; everything that needs the server waits until it is ready. */
-  #floodForm.form-bootstrap-lock > *:not(.sec23-row) {
+  #floodForm.form-bootstrap-lock > *:not(.sec23-row):not(#section-report-type) {
     pointer-events: none;
     user-select: none;
     opacity: .56;
@@ -1166,6 +1166,59 @@
   .maint-toggle[aria-pressed="true"] .maint-toggle-copy span { color: #c9d6e6; }
   .maint-toggle[aria-pressed="true"] .maint-switch { background: var(--orange); }
   .maint-toggle[aria-pressed="true"] .maint-switch::after { transform: translateX(21px); }
+  /* START HERE card: checkbox + bouncing red arrow */
+  .maint-start { display: flex; align-items: center; gap: 18px; }
+  .maint-check {
+    position: relative; display: flex; flex: 1 1 auto; align-items: center; gap: 14px; min-width: 0;
+    padding: 14px 16px; border: 1.5px solid var(--line); border-radius: 13px;
+    background: var(--surface); box-shadow: 0 6px 16px rgba(7, 26, 51, .08); cursor: pointer;
+    transition: background .4s ease, border-color .4s ease, box-shadow .4s ease, transform .2s ease;
+  }
+  .maint-check:hover { border-color: var(--blue-bright); transform: translateY(-1px); }
+  .maint-check input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .maint-check input:focus-visible + .maint-check-box { outline: 3px solid rgba(249, 115, 22, .45); outline-offset: 3px; }
+  .maint-check-box {
+    display: grid; flex: 0 0 34px; height: 34px; place-items: center;
+    border: 2.5px solid #9fb0c4; border-radius: 9px; background: #fff; color: #fff;
+    transition: background .35s ease, border-color .35s ease, box-shadow .35s ease, transform .35s cubic-bezier(.2, .8, .2, 1.4);
+  }
+  .maint-check-box svg { width: 22px; height: 22px; stroke-dasharray: 26; stroke-dashoffset: 26; transition: stroke-dashoffset .45s ease .08s; }
+  .maint-check-copy { flex: 1 1 auto; min-width: 0; }
+  .maint-check-copy strong { display: block; color: var(--ink); font-size: 14.5px; font-weight: 800; line-height: 1.3; }
+  .maint-check-copy span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+  .maint-check.checked { border-color: #22a565; background: #ecfaf2; box-shadow: 0 10px 24px rgba(23, 122, 82, .18); }
+  .maint-check.checked .maint-check-box {
+    border-color: #16a34a; background: linear-gradient(135deg, #22c55e, #15803d);
+    box-shadow: 0 6px 14px rgba(22, 163, 74, .35); transform: scale(1.06);
+  }
+  .maint-check.checked .maint-check-box svg { stroke-dashoffset: 0; }
+  .maint-check.checked .maint-check-copy strong { color: #136b45; }
+  .maint-check.attention { animation: maintAttention 1.6s ease-in-out 3; }
+  @keyframes maintAttention {
+    0%, 100% { box-shadow: 0 6px 16px rgba(7, 26, 51, .08), 0 0 0 0 rgba(220, 38, 38, 0); }
+    50% { box-shadow: 0 6px 16px rgba(7, 26, 51, .08), 0 0 0 6px rgba(220, 38, 38, .22); border-color: #ef4444; }
+  }
+  .maint-callout {
+    display: flex; flex: 0 1 300px; align-items: center; gap: 10px; max-width: 300px; max-height: 120px;
+    color: #dc2626; font-size: 12.5px; font-weight: 800; line-height: 1.35;
+    opacity: 0; transform: translateX(14px);
+    transition: opacity .5s ease, transform .5s ease, max-width .5s ease, flex-basis .5s ease, max-height .5s ease, margin .5s ease;
+  }
+  .maint-callout.show { opacity: 1; transform: none; }
+  .maint-callout.gone { flex-basis: 0; max-width: 0; max-height: 0; margin-left: -18px; opacity: 0; overflow: hidden; white-space: nowrap; pointer-events: none; }
+  .maint-callout-arrow { display: grid; flex: 0 0 34px; height: 34px; place-items: center; color: #dc2626; animation: maintBounceX 1s ease-in-out infinite; }
+  .maint-callout-arrow svg { width: 30px; height: 30px; filter: drop-shadow(0 3px 6px rgba(220, 38, 38, .35)); }
+  @keyframes maintBounceX { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-9px); } }
+  @keyframes maintBounceY { 0%, 100% { transform: rotate(-90deg) translateX(0); } 50% { transform: rotate(-90deg) translateX(-8px); } }
+  @media (max-width: 720px) {
+    .maint-start { flex-direction: column-reverse; align-items: stretch; gap: 10px; }
+    .maint-callout { flex-basis: auto; max-width: none; max-height: 80px; transform: translateY(-8px); }
+    .maint-callout.gone { max-width: none; max-height: 0; margin-left: 0; margin-bottom: -10px; white-space: normal; }
+    .maint-callout-arrow { animation-name: maintBounceY; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .maint-callout-arrow, .maint-check.attention { animation: none; }
+  }
   .maint-lockable { transition: opacity .45s ease, filter .45s ease; }
   #floodForm.maintenance-mode .maint-lockable { opacity: .36; filter: grayscale(.85); pointer-events: none; user-select: none; }
   .maint-pill {
@@ -2025,6 +2078,31 @@
     <div id="referenceWarnings" class="notice"></div>
     <div id="errorBanner" class="error-banner"></div>
     <form id="floodForm" class="form-bootstrap-lock" novalidate aria-busy="true">
+      <!-- START HERE: TYPE OF REPORT (above Sections 1 and 2) -->
+      <section id="section-report-type" class="card maint-start-card">
+        <div class="card-heading">
+          <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4Z"/></svg></div>
+          <div><span class="section-kicker">START HERE</span><h2>Type of Report</h2><p>Tick the box only if there was no rain and no flooding.</p></div>
+        </div>
+        <div class="card-body">
+          <div class="maint-start">
+            <label class="maint-check" id="maintenanceCard" for="maintenanceCheck">
+              <input type="checkbox" id="maintenanceCheck">
+              <span class="maint-check-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+              <span class="maint-check-copy">
+                <strong>No rain and flood — just the usual maintenance activity</strong>
+                <span>Skips the timeline and cause of flooding. Flood height is set to 0.</span>
+              </span>
+            </label>
+            <div class="maint-callout" id="maintCallout" aria-hidden="true">
+              <span class="maint-callout-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5"/><path d="M11 5l-7 7 7 7"/></svg></span>
+              <span class="maint-callout-text">Click this if you are reporting a routine drainage maintenance activity without flooding.</span>
+            </div>
+          </div>
+          <input type="hidden" id="report_type" name="report_type" value="FLOOD">
+        </div>
+      </section>
+
       <!-- SECTION 1 + SECTION 2 SIDE BY SIDE -->
       <div class="sec23-row">
         <section id="section-timeline" class="card">
@@ -2033,15 +2111,6 @@
             <div><span class="section-kicker">SECTION 1</span><h2>Rain and Flood Timeline<span class="maint-pill">NOT APPLICABLE · MAINTENANCE</span></h2><p>Record the flood timeline and the condition of the area after response.</p></div>
           </div>
           <div class="card-body">
-            <button type="button" id="maintenanceToggle" class="maint-toggle" aria-pressed="false">
-              <span class="maint-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4Z"/></svg></span>
-              <span class="maint-toggle-copy">
-                <strong>No rain and flood — just the usual maintenance activity</strong>
-                <span>Turn on to skip the timeline and cause of flooding. Flood height is set to 0.</span>
-              </span>
-              <span class="maint-switch" aria-hidden="true"></span>
-            </button>
-            <input type="hidden" id="report_type" name="report_type" value="FLOOD">
             <div class="tl-stack maint-lockable" data-maint-lock>
               <div class="tl-field">
                 <label class="field-label">What time did the rain start? (Optional)</label>
@@ -3058,9 +3127,11 @@
           toggleResponseStatus_(btn);
         });
       });
-      document.getElementById('maintenanceToggle').addEventListener('click', function () {
-        setMaintenanceMode_(!isMaintenanceMode_());
+      document.getElementById('maintenanceCheck').addEventListener('change', function (event) {
+        dismissMaintenanceCallout_();
+        setMaintenanceMode_(event.target.checked);
       });
+      startMaintenanceCallout_();
       document.querySelectorAll('.dt-trigger').forEach(function (trig) {
         trig.addEventListener('click', function () { openDtPicker(trig.getAttribute('data-dt')); });
       });
@@ -6922,6 +6993,35 @@
     /* ================= USUAL MAINTENANCE ACTIVITY MODE ================= */
     function isMaintenanceMode_() { return Boolean(appState.maintenanceMode); }
 
+    // First-load emphasis: a bouncing red arrow + pulsing ring on the
+    // START HERE checkbox. It fades away once the checkbox is used or the
+    // user starts filling Section 1 / 2 (a flood report).
+    function startMaintenanceCallout_() {
+      const callout = document.getElementById('maintCallout');
+      const card = document.getElementById('maintenanceCard');
+      if (!callout || !card) return;
+      window.setTimeout(function () {
+        if (appState.maintenanceCalloutDismissed) return;
+        callout.classList.add('show');
+        card.classList.add('attention');
+      }, 500);
+      const row = document.querySelector('.sec23-row');
+      if (row) {
+        ['pointerdown', 'focusin'].forEach(function (type) {
+          row.addEventListener(type, dismissMaintenanceCallout_, { once: true });
+        });
+      }
+    }
+
+    function dismissMaintenanceCallout_() {
+      if (appState.maintenanceCalloutDismissed) return;
+      appState.maintenanceCalloutDismissed = true;
+      const callout = document.getElementById('maintCallout');
+      const card = document.getElementById('maintenanceCard');
+      if (card) card.classList.remove('attention');
+      if (callout) { callout.classList.remove('show'); callout.classList.add('gone'); }
+    }
+
     function validateInterventionsOnly_() {
       const interventionSelected = Boolean(document.querySelector('.intervention-choice:checked'));
       setChoiceGroupInvalid('cause', false);
@@ -6966,7 +7066,8 @@
       const on = Boolean(enabled);
       if (on === isMaintenanceMode_()) return;
       const form = document.getElementById('floodForm');
-      const toggle = document.getElementById('maintenanceToggle');
+      const checkbox = document.getElementById('maintenanceCheck');
+      const card = document.getElementById('maintenanceCard');
 
       if (on) {
         // Remember what was there so turning the switch off brings it back.
@@ -7019,7 +7120,8 @@
 
       appState.maintenanceMode = on;
       form.classList.toggle('maintenance-mode', on);
-      toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+      checkbox.checked = on;
+      card.classList.toggle('checked', on);
       document.getElementById('report_type').value = on ? 'MAINTENANCE' : 'FLOOD';
       document.querySelectorAll('[data-maint-lock]').forEach(function (element) {
         if (on) element.setAttribute('inert', '');
@@ -7039,7 +7141,8 @@
       // Sections 1-2 (timeline + height) never wait for the server, so the
       // user can start right away. The rest unlocks once reference data loads.
       Array.from(form.children).forEach(function (child) {
-        if (shouldLock && !child.classList.contains('sec23-row')) child.setAttribute('inert', '');
+        const alwaysOpen = child.classList.contains('sec23-row') || child.id === 'section-report-type';
+        if (shouldLock && !alwaysOpen) child.setAttribute('inert', '');
         else child.removeAttribute('inert');
       });
     }
