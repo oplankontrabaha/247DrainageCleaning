@@ -6,4 +6,4 @@
  *
  * Where to find it: Apps Script > Deploy > Manage deployments > Web app URL
  */
-window.FMR_API_URL = 'PASTE_YOUR_APPS_SCRIPT_EXEC_LINK_HERE';
+window.FMR_API_URL = 'https://script.google.com/macros/s/AKfycbyEQBy42jdnLNvxBsI4Af3qB5QQPNqPuN0cl_oo-qoo9LTTYQEyRqzNsIUWQMsTWuG_RA/exec';
