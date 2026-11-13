@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERIFIED BUILD: 24/7 FLOOD MONITORING V28 - GITHUB PAGES EDITION (BACKEND: CODE.GS V13 API) -->
+<!-- VERIFIED BUILD: 24/7 FLOOD MONITORING V29 - MAINTENANCE MODE + TIMELINE-FIRST ORDER (BACKEND: CODE.GS V14) -->
 <html lang="en">
 <head>
   <base target="_top">
@@ -1116,15 +1116,69 @@
     .error-banner.show { display: block; }
 
     /* ===== BOOTSTRAP FORM LOCK ===== */
-  #floodForm.form-bootstrap-lock {
+  /* Sections 1-2 (timeline + height) stay usable while reference data
+     loads; everything that needs the server waits until it is ready. */
+  #floodForm.form-bootstrap-lock > *:not(.sec23-row) {
     pointer-events: none;
     user-select: none;
-  }
-  #floodForm.form-bootstrap-lock > * {
     opacity: .56;
     filter: saturate(.72);
     transition: opacity .22s ease, filter .22s ease;
   }
+
+  /* ===== USUAL MAINTENANCE ACTIVITY MODE ===== */
+  .maint-toggle {
+    display: flex; align-items: center; gap: 14px; width: 100%;
+    margin: 0 0 16px; padding: 14px 16px;
+    border: 1.5px solid var(--line); border-radius: 13px;
+    background: var(--surface); color: var(--ink);
+    box-shadow: 0 6px 16px rgba(7, 26, 51, .08);
+    font: inherit; text-align: left; cursor: pointer;
+    transition: background .4s ease, border-color .4s ease, color .4s ease, box-shadow .4s ease, transform .2s ease;
+  }
+  .maint-toggle:hover { border-color: var(--blue-bright); transform: translateY(-1px); }
+  .maint-toggle:focus-visible { outline: 3px solid rgba(249, 115, 22, .45); outline-offset: 2px; }
+  .maint-toggle-icon {
+    display: grid; flex: 0 0 42px; height: 42px; place-items: center;
+    border-radius: 11px; color: #fff;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+    box-shadow: 0 6px 14px rgba(249, 115, 22, .32);
+  }
+  .maint-toggle-icon svg { width: 21px; height: 21px; }
+  .maint-toggle-copy { flex: 1 1 auto; min-width: 0; }
+  .maint-toggle-copy strong { display: block; font-size: 14px; font-weight: 800; line-height: 1.25; }
+  .maint-toggle-copy span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.35; transition: color .4s ease; }
+  .maint-switch { position: relative; flex: 0 0 48px; height: 27px; border-radius: 999px; background: #cfd9e5; transition: background .4s ease; }
+  .maint-switch::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 21px; height: 21px;
+    border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(7, 26, 51, .28);
+    transition: transform .4s cubic-bezier(.2, .8, .2, 1);
+  }
+  .maint-toggle[aria-pressed="true"] {
+    border-color: var(--navy); color: #fff;
+    background: linear-gradient(135deg, var(--navy), var(--blue));
+    box-shadow: 0 12px 26px rgba(7, 26, 51, .28);
+  }
+  .maint-toggle[aria-pressed="true"] .maint-toggle-copy span { color: #c9d6e6; }
+  .maint-toggle[aria-pressed="true"] .maint-switch { background: var(--orange); }
+  .maint-toggle[aria-pressed="true"] .maint-switch::after { transform: translateX(21px); }
+  .maint-lockable { transition: opacity .45s ease, filter .45s ease; }
+  #floodForm.maintenance-mode .maint-lockable { opacity: .36; filter: grayscale(.85); pointer-events: none; user-select: none; }
+  .maint-pill {
+    display: inline-block; max-width: 0; margin-left: 0; padding: 2px 0;
+    overflow: hidden; vertical-align: middle; white-space: nowrap;
+    border-radius: 999px; background: var(--orange); color: #fff;
+    font-size: 10px; font-weight: 800; letter-spacing: .06em;
+    opacity: 0; transform: scale(.85);
+    transition: max-width .45s ease, padding .45s ease, margin .45s ease, opacity .35s ease, transform .35s ease;
+  }
+  #floodForm.maintenance-mode .maint-pill { max-width: 260px; margin-left: 8px; padding: 2px 9px; opacity: 1; transform: none; }
+  .maint-note {
+    max-height: 0; margin: 0; overflow: hidden; opacity: 0;
+    color: var(--orange-dark); font-size: 12px; font-weight: 700;
+    transition: max-height .45s ease, margin .45s ease, opacity .35s ease;
+  }
+  #floodForm.maintenance-mode .maint-note { max-height: 60px; margin-top: 10px; opacity: 1; }
   #floodForm.form-bootstrap-ready > * {
     opacity: 1;
     filter: none;
@@ -1966,11 +2020,226 @@
   <main class="page-shell">
     <div id="referenceWarnings" class="notice"></div>
     <div id="errorBanner" class="error-banner"></div>
-    <form id="floodForm" class="form-bootstrap-lock" novalidate inert aria-busy="true">
+    <form id="floodForm" class="form-bootstrap-lock" novalidate aria-busy="true">
+      <!-- SECTION 1 + SECTION 2 SIDE BY SIDE -->
+      <div class="sec23-row">
+        <section id="section-timeline" class="card">
+          <div class="card-heading">
+            <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div><span class="section-kicker">SECTION 1</span><h2>Rain and Flood Timeline<span class="maint-pill">NOT APPLICABLE · MAINTENANCE</span></h2><p>Record the flood timeline and the condition of the area after response.</p></div>
+          </div>
+          <div class="card-body">
+            <button type="button" id="maintenanceToggle" class="maint-toggle" aria-pressed="false">
+              <span class="maint-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4Z"/></svg></span>
+              <span class="maint-toggle-copy">
+                <strong>No rain and flood — just the usual maintenance activity</strong>
+                <span>Turn on to skip the timeline and cause of flooding. Flood height is set to 0.</span>
+              </span>
+              <span class="maint-switch" aria-hidden="true"></span>
+            </button>
+            <input type="hidden" id="report_type" name="report_type" value="FLOOD">
+            <div class="tl-stack maint-lockable" data-maint-lock>
+              <div class="tl-field">
+                <label class="field-label">What time did the rain start? (Optional)</label>
+                <button type="button" class="dt-trigger" id="rain_start_trigger" data-dt="rain_start"><span class="dt-value">Select date &amp; time</span></button>
+                <input type="hidden" id="rain_start" name="rain_start">
+                <div id="rain_startStatus" class="timeline-field-status" aria-live="polite"></div>
+              </div>
+              <div class="tl-field">
+                <label class="field-label">What time did the rain end? (Optional)</label>
+                <button type="button" class="dt-trigger" id="rain_end_trigger" data-dt="rain_end"><span class="dt-value">Select date &amp; time</span></button>
+                <input type="hidden" id="rain_end" name="rain_end">
+                <div id="rain_endStatus" class="timeline-field-status" aria-live="polite"></div>
+              </div>
+              <div class="tl-field">
+                <label class="field-label required">What time did the flood start?</label>
+                <button type="button" class="dt-trigger" id="flood_start_trigger" data-dt="flood_start"><span class="dt-value">Select date &amp; time</span></button>
+                <input type="hidden" id="flood_start" name="flood_start">
+                <div id="flood_startStatus" class="timeline-field-status" aria-live="polite"></div>
+              </div>
+              <div class="tl-field">
+                <label class="field-label required">What time did the flood end?</label>
+                <button type="button" class="dt-trigger" id="flood_end_trigger" data-dt="flood_end"><span class="dt-value">Select date &amp; time</span></button>
+                <input type="hidden" id="flood_end" name="flood_end">
+                <div id="flood_endStatus" class="timeline-field-status" aria-live="polite"></div>
+              </div>
+              <div class="tl-field">
+                <label class="field-label required">Rain Intensity</label>
+                <div class="intensity-group" id="intensityGroup">
+                  <button type="button" class="intensity-btn active" data-intensity="LIGHT" aria-pressed="true">Light</button>
+                  <button type="button" class="intensity-btn" data-intensity="MEDIUM" aria-pressed="false">Medium</button>
+                  <button type="button" class="intensity-btn" data-intensity="HEAVY" aria-pressed="false">Heavy</button>
+                </div>
+                <input type="hidden" id="rain_intensity" name="rain_intensity" value="LIGHT">
+              </div>
+
+              <div class="agency-logo-row" id="agencyLogoRow" aria-label="OKB and DPWH logos">
+                <img class="agency-logo okb-logo" src="https://lh3.googleusercontent.com/d/10xNS0UasomLq_n0sWmRpd2ioaGwzB97j" alt="OKB logo" loading="lazy" decoding="async">
+                <img class="agency-logo dpwh-logo" src="https://lh3.googleusercontent.com/d/15r0-MS1qhh_cizTu42-x8KjHpsMvKzmu" alt="DPWH logo" loading="lazy" decoding="async">
+              </div>
+
+              <div id="timelineValidationSummary" class="timeline-validation-summary" aria-live="assertive"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="section-height" class="card">
+          <div class="card-heading">
+            <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V4h5v16M14 20V9h5v11M3 20h18"/></svg></div>
+            <div><span class="section-kicker">SECTION 2</span><h2>Maximum Flood Height<span class="maint-pill">SET TO 0 CM · MAINTENANCE</span></h2><p>Enter the flood height or drag the water level beside the human figure.</p></div>
+          </div>
+          <div class="card-body maint-lockable" data-maint-lock>
+            <div class="height-layout">
+              <div class="height-input-panel">
+                <div class="height-entry-row">
+                  <div class="height-control-line">
+                    <label class="height-entry-label required" for="max_flood">Flood Height</label>
+                    <div class="max-height-stepper">
+                      <button type="button" class="step-btn max-height-step-btn" data-max-height-step="-10" aria-label="Decrease maximum flood height by 10 centimeters">&minus;</button>
+                      <div class="height-input-wrap">
+                        <input id="max_flood" type="text" inputmode="numeric" required value="15" placeholder="15" aria-label="Maximum Flood Height in centimeters">
+                        <span class="height-unit">CM</span>
+                      </div>
+                      <button type="button" class="step-btn max-height-step-btn" data-max-height-step="10" aria-label="Increase maximum flood height by 10 centimeters">+</button>
+                    </div>
+                  </div>
+                  <div class="height-details">
+                    <span class="height-details-title">Entered height</span>
+                    <div class="visual-stats" aria-live="polite">
+                      <strong id="heightMeters">15 CM</strong>
+                      <span id="heightCentimeters" class="visual-stat-detail">0.15 M</span>
+                      <span id="heightPercent" class="visual-stat-detail">9% OF 164 CM</span>
+                      <span id="bodyLevel" class="visual-stat-detail">BODY LEVEL: LOWER LEG</span>
+                    </div>
+                  </div>
+                  <div class="hint">Type a value in centimeters or drag the water level on the human figure.</div>
+                </div>
+                <input type="hidden" id="max_flood_m" name="max_flood" value="0.15">
+              </div>
+              <div class="height-visual" aria-label="Flood height comparison visualization">
+                <div id="heightStage" class="height-stage">
+                  <div class="drag-badge">DRAG TO ADJUST</div>
+                  <div id="heightScaleLines" class="height-scale-lines" aria-hidden="true"></div>
+                  <div id="personWrap" class="person-wrap">
+                    <svg viewBox="0 0 78 164" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+                      <g fill="#f8fbff" stroke="#071a33" stroke-width="2.45" stroke-linecap="round" stroke-linejoin="round">
+                        <ellipse cx="39" cy="12" rx="9.4" ry="11.2"/>
+                        <path d="M35 23 L35 29.5 M43 23 L43 29.5" fill="none"/>
+                        <path d="M35 29.5 C30.8 30.1 27 31.1 24.5 33.5 C22.8 35.4 22.3 38.2 22.7 42 L24.8 57.8 C25.3 62.8 26.8 67.1 29.2 70.8 L29.8 79.5 L48.2 79.5 L48.8 70.8 C51.2 67.1 52.7 62.8 53.2 57.8 L55.3 42 C55.7 38.2 55.2 35.4 53.5 33.5 C51 31.1 47.2 30.1 43 29.5 Z"/>
+                        <path d="M31.8 79.5 L38 79.5 L37.3 117.5 L36.2 153.5 L29.6 153.5 L28.9 119 L29.1 91.5 Z"/>
+                        <path d="M40 79.5 L46.2 79.5 L48.9 91.5 L49.1 119 L48.4 153.5 L41.8 153.5 L40.7 117.5 Z"/>
+                        <path d="M29.6 153.5 L36.2 153.5 L36.2 163 L25.1 163 C22.9 163 22.7 160.5 24.7 159 Z"/>
+                        <path d="M41.8 153.5 L48.4 153.5 L53.3 159 C55.3 160.5 55.1 163 52.9 163 L41.8 163 Z"/>
+                      </g>
+                      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <g stroke="#071a33" stroke-width="7.2">
+                          <path d="M24.2 36.5 C21.2 45.5 19.7 56.8 18.8 68 L17.4 84.5 C17.2 88.2 18.4 90.8 20.4 92"/>
+                          <path d="M53.8 36.5 C56.8 45.5 58.3 56.8 59.2 68 L60.6 84.5 C60.8 88.2 59.6 90.8 57.6 92"/>
+                        </g>
+                        <g stroke="#f8fbff" stroke-width="3.6">
+                          <path d="M24.2 36.5 C21.2 45.5 19.7 56.8 18.8 68 L17.4 84.5 C17.2 88.2 18.4 90.8 20.4 92"/>
+                          <path d="M53.8 36.5 C56.8 45.5 58.3 56.8 59.2 68 L60.6 84.5 C60.8 88.2 59.6 90.8 57.6 92"/>
+                        </g>
+                      </g>
+                      <g fill="#f8fbff" stroke="#071a33" stroke-width="2.45">
+                        <ellipse cx="20.5" cy="92" rx="3.4" ry="4.6" transform="rotate(-18 20.5 92)"/>
+                        <ellipse cx="57.5" cy="92" rx="3.4" ry="4.6" transform="rotate(18 57.5 92)"/>
+                      </g>
+                      <g fill="none" stroke="#7892ad" stroke-width="1.1" stroke-linecap="round" opacity="0.72">
+                        <path d="M27 44 C32.5 42.1 45.5 42.1 51 44"/>
+                        <path d="M30.5 64 C34.5 65.2 43.5 65.2 47.5 64"/>
+                        <path d="M29.1 119 L37.2 119 M40.8 119 L48.9 119"/>
+                      </g>
+                    </svg>
+                  </div>
+                  <div id="water" class="water"><div class="water-handle"></div></div>
+                  <div id="referenceLine" class="reference-line"><span>164 CM</span></div>
+                </div>
+              </div>
+            </div>            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="sec45-row">
+      <section id="section-cause" class="card">
+        <div class="card-heading">
+          <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2.8 19h18.4L12 3Z"/><path d="M12 9v4M12 16h.01"/></svg></div>
+          <div><span class="section-kicker">SECTION 3</span><h2>Cause of Flooding<span class="maint-pill">NOT APPLICABLE · MAINTENANCE</span></h2><p>Select all applicable causes. The OTHER panel may be combined and appears above NO FLOODING.</p></div>
+        </div>
+        <div class="card-body maint-lockable" data-maint-lock>
+          <label class="field-label required">Applicable Cause or Causes</label>
+          <div id="causeChoices" class="choice-grid"></div>
+          <div id="causeOtherWrap" class="other-choice-wrap">
+            <div class="other-choice-heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+              Other cause — may be combined with normal choices
+            </div>
+            <div id="causeOtherChoices" class="choice-grid"></div>
+            <div id="causeRemarksWrap" class="remarks-wrap">
+              <label class="field-label required" for="cause_remarks">Other Cause Remarks</label>
+              <textarea id="cause_remarks" name="cause_remarks" placeholder="DESCRIBE THE OTHER CAUSE"></textarea>
+            </div>
+          </div>
+          <div id="causeExclusive" class="exclusive-choice-wrap">
+            <div class="exclusive-heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>
+              No Flooding — click this when the area was only inspected or visited but no flooding was observed
+            </div>
+          </div>
+          <input id="cause" name="cause" type="hidden">
+        </div>
+      </section>
+
+      <section id="section-intervention" class="card">
+        <div class="card-heading">
+          <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14.7 6.3 3-3 3 3-3 3"/><path d="M17.7 6.3 9 15l-4 1 1-4 8.7-8.7"/><path d="M4 20h16"/></svg></div>
+          <div><span class="section-kicker">SECTION 4</span><h2>Interventions Made</h2><p>Select all actions performed, then record the flood level after intervention.</p></div>
+        </div>
+        <div class="card-body">
+          <label class="field-label required">Applicable Intervention or Interventions</label>
+          <div id="interventionChoices" class="choice-grid"></div>
+          <div id="interventionOtherWrap" class="other-choice-wrap">
+            <div class="other-choice-heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+              Other intervention — may be combined with normal choices
+            </div>
+            <div id="interventionOtherChoices" class="choice-grid"></div>
+            <div id="interventionRemarksWrap" class="remarks-wrap">
+              <label class="field-label required" for="interventions_remarks">Other Intervention Remarks</label>
+              <textarea id="interventions_remarks" name="interventions_remarks" placeholder="DESCRIBE THE OTHER INTERVENTION"></textarea>
+            </div>
+          </div>
+          <div id="interventionExclusive" class="exclusive-choice-wrap">
+            <div class="exclusive-heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>
+              No Intervention Was Made — exclusive response
+            </div>
+          </div>
+
+          <div id="afterHeightPanel" class="after-height-panel maint-lockable" data-maint-lock>
+            <label class="field-label required" for="after_height">What is the flood level after intervention?</label>
+            <div class="after-height-stepper">
+              <button type="button" class="step-btn" data-after-height-step="-5" aria-label="Decrease flood level after intervention by 5 centimeters">&minus;</button>
+              <div class="after-height-input-wrap">
+                <input id="after_height" type="text" inputmode="numeric" value="0" required aria-label="Flood level after intervention in centimeters">
+                <span class="after-height-unit">CM</span>
+              </div>
+              <button type="button" class="step-btn" data-after-height-step="5" aria-label="Increase flood level after intervention by 5 centimeters">+</button>
+            </div>
+            <input type="hidden" id="after_height_m" name="after_height" value="0">
+            <div class="after-height-hint">Use the buttons or type the measured level. Each button changes the value by 5 cm.</div>
+          </div>
+          <div class="maint-note">Usual maintenance activity: the flood level after intervention is set to 0 cm.</div>
+          <input id="interventions" name="interventions" type="hidden">
+        </div>
+      </section>
+      </div>
+
       <section id="section-location" class="card">
         <div class="card-heading">
           <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
-          <div><span class="section-kicker">SECTION 1</span><h2>Location and Reporting Office</h2><p>Select the reporting office and location details while the map smoothly focuses on each selected area.</p></div>
+          <div><span class="section-kicker">SECTION 5</span><h2>Location and Reporting Office</h2><p>Select the reporting office and location details while the map smoothly focuses on each selected area.</p></div>
         </div>
         <div class="card-body">
           <div class="location-two-col">
@@ -2057,211 +2326,6 @@
         </div>
       </section>
 
-      <!-- SECTION 2 + SECTION 3 SIDE BY SIDE -->
-      <div class="sec23-row">
-        <section id="section-timeline" class="card">
-          <div class="card-heading">
-            <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-            <div><span class="section-kicker">SECTION 2</span><h2>Rain and Flood Timeline</h2><p>Record the flood timeline and the condition of the area after response.</p></div>
-          </div>
-          <div class="card-body">
-            <div class="tl-stack">
-              <div class="tl-field">
-                <label class="field-label">What time did the rain start? (Optional)</label>
-                <button type="button" class="dt-trigger" id="rain_start_trigger" data-dt="rain_start"><span class="dt-value">Select date &amp; time</span></button>
-                <input type="hidden" id="rain_start" name="rain_start">
-                <div id="rain_startStatus" class="timeline-field-status" aria-live="polite"></div>
-              </div>
-              <div class="tl-field">
-                <label class="field-label">What time did the rain end? (Optional)</label>
-                <button type="button" class="dt-trigger" id="rain_end_trigger" data-dt="rain_end"><span class="dt-value">Select date &amp; time</span></button>
-                <input type="hidden" id="rain_end" name="rain_end">
-                <div id="rain_endStatus" class="timeline-field-status" aria-live="polite"></div>
-              </div>
-              <div class="tl-field">
-                <label class="field-label required">What time did the flood start?</label>
-                <button type="button" class="dt-trigger" id="flood_start_trigger" data-dt="flood_start"><span class="dt-value">Select date &amp; time</span></button>
-                <input type="hidden" id="flood_start" name="flood_start">
-                <div id="flood_startStatus" class="timeline-field-status" aria-live="polite"></div>
-              </div>
-              <div class="tl-field">
-                <label class="field-label required">What time did the flood end?</label>
-                <button type="button" class="dt-trigger" id="flood_end_trigger" data-dt="flood_end"><span class="dt-value">Select date &amp; time</span></button>
-                <input type="hidden" id="flood_end" name="flood_end">
-                <div id="flood_endStatus" class="timeline-field-status" aria-live="polite"></div>
-              </div>
-              <div class="tl-field">
-                <label class="field-label required">Rain Intensity</label>
-                <div class="intensity-group" id="intensityGroup">
-                  <button type="button" class="intensity-btn active" data-intensity="LIGHT" aria-pressed="true">Light</button>
-                  <button type="button" class="intensity-btn" data-intensity="MEDIUM" aria-pressed="false">Medium</button>
-                  <button type="button" class="intensity-btn" data-intensity="HEAVY" aria-pressed="false">Heavy</button>
-                </div>
-                <input type="hidden" id="rain_intensity" name="rain_intensity" value="LIGHT">
-              </div>
-
-              <div class="agency-logo-row" id="agencyLogoRow" aria-label="OKB and DPWH logos">
-                <img class="agency-logo okb-logo" src="https://lh3.googleusercontent.com/d/10xNS0UasomLq_n0sWmRpd2ioaGwzB97j" alt="OKB logo" loading="lazy" decoding="async">
-                <img class="agency-logo dpwh-logo" src="https://lh3.googleusercontent.com/d/15r0-MS1qhh_cizTu42-x8KjHpsMvKzmu" alt="DPWH logo" loading="lazy" decoding="async">
-              </div>
-
-              <div id="timelineValidationSummary" class="timeline-validation-summary" aria-live="assertive"></div>
-            </div>
-          </div>
-        </section>
-
-        <section id="section-height" class="card">
-          <div class="card-heading">
-            <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V4h5v16M14 20V9h5v11M3 20h18"/></svg></div>
-            <div><span class="section-kicker">SECTION 3</span><h2>Maximum Flood Height</h2><p>Enter the flood height or drag the water level beside the human figure.</p></div>
-          </div>
-          <div class="card-body">
-            <div class="height-layout">
-              <div class="height-input-panel">
-                <div class="height-entry-row">
-                  <div class="height-control-line">
-                    <label class="height-entry-label required" for="max_flood">Flood Height</label>
-                    <div class="max-height-stepper">
-                      <button type="button" class="step-btn max-height-step-btn" data-max-height-step="-10" aria-label="Decrease maximum flood height by 10 centimeters">&minus;</button>
-                      <div class="height-input-wrap">
-                        <input id="max_flood" type="text" inputmode="numeric" required value="15" placeholder="15" aria-label="Maximum Flood Height in centimeters">
-                        <span class="height-unit">CM</span>
-                      </div>
-                      <button type="button" class="step-btn max-height-step-btn" data-max-height-step="10" aria-label="Increase maximum flood height by 10 centimeters">+</button>
-                    </div>
-                  </div>
-                  <div class="height-details">
-                    <span class="height-details-title">Entered height</span>
-                    <div class="visual-stats" aria-live="polite">
-                      <strong id="heightMeters">15 CM</strong>
-                      <span id="heightCentimeters" class="visual-stat-detail">0.15 M</span>
-                      <span id="heightPercent" class="visual-stat-detail">9% OF 164 CM</span>
-                      <span id="bodyLevel" class="visual-stat-detail">BODY LEVEL: LOWER LEG</span>
-                    </div>
-                  </div>
-                  <div class="hint">Type a value in centimeters or drag the water level on the human figure.</div>
-                </div>
-                <input type="hidden" id="max_flood_m" name="max_flood" value="0.15">
-              </div>
-              <div class="height-visual" aria-label="Flood height comparison visualization">
-                <div id="heightStage" class="height-stage">
-                  <div class="drag-badge">DRAG TO ADJUST</div>
-                  <div id="heightScaleLines" class="height-scale-lines" aria-hidden="true"></div>
-                  <div id="personWrap" class="person-wrap">
-                    <svg viewBox="0 0 78 164" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-                      <g fill="#f8fbff" stroke="#071a33" stroke-width="2.45" stroke-linecap="round" stroke-linejoin="round">
-                        <ellipse cx="39" cy="12" rx="9.4" ry="11.2"/>
-                        <path d="M35 23 L35 29.5 M43 23 L43 29.5" fill="none"/>
-                        <path d="M35 29.5 C30.8 30.1 27 31.1 24.5 33.5 C22.8 35.4 22.3 38.2 22.7 42 L24.8 57.8 C25.3 62.8 26.8 67.1 29.2 70.8 L29.8 79.5 L48.2 79.5 L48.8 70.8 C51.2 67.1 52.7 62.8 53.2 57.8 L55.3 42 C55.7 38.2 55.2 35.4 53.5 33.5 C51 31.1 47.2 30.1 43 29.5 Z"/>
-                        <path d="M31.8 79.5 L38 79.5 L37.3 117.5 L36.2 153.5 L29.6 153.5 L28.9 119 L29.1 91.5 Z"/>
-                        <path d="M40 79.5 L46.2 79.5 L48.9 91.5 L49.1 119 L48.4 153.5 L41.8 153.5 L40.7 117.5 Z"/>
-                        <path d="M29.6 153.5 L36.2 153.5 L36.2 163 L25.1 163 C22.9 163 22.7 160.5 24.7 159 Z"/>
-                        <path d="M41.8 153.5 L48.4 153.5 L53.3 159 C55.3 160.5 55.1 163 52.9 163 L41.8 163 Z"/>
-                      </g>
-                      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <g stroke="#071a33" stroke-width="7.2">
-                          <path d="M24.2 36.5 C21.2 45.5 19.7 56.8 18.8 68 L17.4 84.5 C17.2 88.2 18.4 90.8 20.4 92"/>
-                          <path d="M53.8 36.5 C56.8 45.5 58.3 56.8 59.2 68 L60.6 84.5 C60.8 88.2 59.6 90.8 57.6 92"/>
-                        </g>
-                        <g stroke="#f8fbff" stroke-width="3.6">
-                          <path d="M24.2 36.5 C21.2 45.5 19.7 56.8 18.8 68 L17.4 84.5 C17.2 88.2 18.4 90.8 20.4 92"/>
-                          <path d="M53.8 36.5 C56.8 45.5 58.3 56.8 59.2 68 L60.6 84.5 C60.8 88.2 59.6 90.8 57.6 92"/>
-                        </g>
-                      </g>
-                      <g fill="#f8fbff" stroke="#071a33" stroke-width="2.45">
-                        <ellipse cx="20.5" cy="92" rx="3.4" ry="4.6" transform="rotate(-18 20.5 92)"/>
-                        <ellipse cx="57.5" cy="92" rx="3.4" ry="4.6" transform="rotate(18 57.5 92)"/>
-                      </g>
-                      <g fill="none" stroke="#7892ad" stroke-width="1.1" stroke-linecap="round" opacity="0.72">
-                        <path d="M27 44 C32.5 42.1 45.5 42.1 51 44"/>
-                        <path d="M30.5 64 C34.5 65.2 43.5 65.2 47.5 64"/>
-                        <path d="M29.1 119 L37.2 119 M40.8 119 L48.9 119"/>
-                      </g>
-                    </svg>
-                  </div>
-                  <div id="water" class="water"><div class="water-handle"></div></div>
-                  <div id="referenceLine" class="reference-line"><span>164 CM</span></div>
-                </div>
-              </div>
-            </div>            </div>
-          </div>
-        </section>
-      </div>
-
-      <div class="sec45-row">
-      <section id="section-cause" class="card">
-        <div class="card-heading">
-          <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2.8 19h18.4L12 3Z"/><path d="M12 9v4M12 16h.01"/></svg></div>
-          <div><span class="section-kicker">SECTION 4</span><h2>Cause of Flooding</h2><p>Select all applicable causes. The OTHER panel may be combined and appears above NO FLOODING.</p></div>
-        </div>
-        <div class="card-body">
-          <label class="field-label required">Applicable Cause or Causes</label>
-          <div id="causeChoices" class="choice-grid"></div>
-          <div id="causeOtherWrap" class="other-choice-wrap">
-            <div class="other-choice-heading">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-              Other cause — may be combined with normal choices
-            </div>
-            <div id="causeOtherChoices" class="choice-grid"></div>
-            <div id="causeRemarksWrap" class="remarks-wrap">
-              <label class="field-label required" for="cause_remarks">Other Cause Remarks</label>
-              <textarea id="cause_remarks" name="cause_remarks" placeholder="DESCRIBE THE OTHER CAUSE"></textarea>
-            </div>
-          </div>
-          <div id="causeExclusive" class="exclusive-choice-wrap">
-            <div class="exclusive-heading">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>
-              No Flooding — click this when the area was only inspected or visited but no flooding was observed
-            </div>
-          </div>
-          <input id="cause" name="cause" type="hidden">
-        </div>
-      </section>
-
-      <section id="section-intervention" class="card">
-        <div class="card-heading">
-          <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m14.7 6.3 3-3 3 3-3 3"/><path d="M17.7 6.3 9 15l-4 1 1-4 8.7-8.7"/><path d="M4 20h16"/></svg></div>
-          <div><span class="section-kicker">SECTION 5</span><h2>Interventions Made</h2><p>Select all actions performed, then record the flood level after intervention.</p></div>
-        </div>
-        <div class="card-body">
-          <label class="field-label required">Applicable Intervention or Interventions</label>
-          <div id="interventionChoices" class="choice-grid"></div>
-          <div id="interventionOtherWrap" class="other-choice-wrap">
-            <div class="other-choice-heading">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
-              Other intervention — may be combined with normal choices
-            </div>
-            <div id="interventionOtherChoices" class="choice-grid"></div>
-            <div id="interventionRemarksWrap" class="remarks-wrap">
-              <label class="field-label required" for="interventions_remarks">Other Intervention Remarks</label>
-              <textarea id="interventions_remarks" name="interventions_remarks" placeholder="DESCRIBE THE OTHER INTERVENTION"></textarea>
-            </div>
-          </div>
-          <div id="interventionExclusive" class="exclusive-choice-wrap">
-            <div class="exclusive-heading">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>
-              No Intervention Was Made — exclusive response
-            </div>
-          </div>
-
-          <div id="afterHeightPanel" class="after-height-panel">
-            <label class="field-label required" for="after_height">What is the flood level after intervention?</label>
-            <div class="after-height-stepper">
-              <button type="button" class="step-btn" data-after-height-step="-5" aria-label="Decrease flood level after intervention by 5 centimeters">&minus;</button>
-              <div class="after-height-input-wrap">
-                <input id="after_height" type="text" inputmode="numeric" value="0" required aria-label="Flood level after intervention in centimeters">
-                <span class="after-height-unit">CM</span>
-              </div>
-              <button type="button" class="step-btn" data-after-height-step="5" aria-label="Increase flood level after intervention by 5 centimeters">+</button>
-            </div>
-            <input type="hidden" id="after_height_m" name="after_height" value="0">
-            <div class="after-height-hint">Use the buttons or type the measured level. Each button changes the value by 5 cm.</div>
-          </div>
-          <input id="interventions" name="interventions" type="hidden">
-        </div>
-      </section>
-      </div>
-
       <section id="section-photos" class="card">
         <div class="card-heading">
           <div class="section-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="m8 5 1.3-2h5.4L16 5"/></svg></div>
@@ -2278,7 +2342,7 @@
                   <input class="photo-file-input" id="before_picture" name="before_picture" type="file" multiple accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.heic,.heif,.tif,.tiff" required>
                 </div>
                 <div id="beforeName" class="file-name">Select one or more images • Maximum 30 MB per image</div>
-                <div class="photo-response-status">
+                <div class="photo-response-status maint-lockable" data-maint-lock>
                   <label class="field-label required">Select Status Before Response</label>
                   <div class="response-status-grid" data-response-status-panel="before" role="group" aria-label="Status before response">
                     <button type="button" class="response-status-btn" data-response-status="VEHICLE PASSABLE">Vehicle Passable</button>
@@ -2303,7 +2367,7 @@
                   <input class="photo-file-input" id="during_picture" name="during_picture" type="file" accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.heic,.heif,.tif,.tiff" required>
                 </div>
                 <div id="duringName" class="file-name">Maximum 30 MB</div>
-                <div class="photo-response-status">
+                <div class="photo-response-status maint-lockable" data-maint-lock>
                   <label class="field-label required">Select Status During Response</label>
                   <div class="response-status-grid" data-response-status-panel="during" role="group" aria-label="Status during response">
                     <button type="button" class="response-status-btn" data-response-status="VEHICLE PASSABLE">Vehicle Passable</button>
@@ -2328,7 +2392,7 @@
                   <input class="photo-file-input" id="after_picture" name="after_picture" type="file" accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.heic,.heif,.tif,.tiff" required>
                 </div>
                 <div id="afterName" class="file-name">Maximum 30 MB</div>
-                <div class="photo-response-status">
+                <div class="photo-response-status maint-lockable" data-maint-lock>
                   <label class="field-label required">Select Status After Response</label>
                   <div class="response-status-grid" data-response-status-panel="after" role="group" aria-label="Status after response">
                     <button type="button" class="response-status-btn" data-response-status="VEHICLE PASSABLE">Vehicle Passable</button>
@@ -2350,6 +2414,7 @@
           <!-- Temporary compatibility with the current backend. Mirrors AFTER until Code.gs is updated. -->
           <input type="hidden" id="post_response_status" name="post_response_status">
           <div class="response-status-hint">Choose the applicable status independently for BEFORE, DURING, and AFTER.</div>
+          <div class="maint-note">Usual maintenance activity: the BEFORE, DURING, and AFTER status buttons are left blank. Photos are still required.</div>
           <div class="hint" style="margin-top:12px">At least one BEFORE, DURING, and AFTER image is required. Additional BEFORE images are stored as separate photo records under the same report ID.</div>
         </div>
       </section>
@@ -2988,6 +3053,9 @@
         btn.addEventListener('click', function () {
           toggleResponseStatus_(btn);
         });
+      });
+      document.getElementById('maintenanceToggle').addEventListener('click', function () {
+        setMaintenanceMode_(!isMaintenanceMode_());
       });
       document.querySelectorAll('.dt-trigger').forEach(function (trig) {
         trig.addEventListener('click', function () { openDtPicker(trig.getAttribute('data-dt')); });
@@ -4385,7 +4453,7 @@
           finishManualPinMapTransaction_(serial);
           console.warn('Manual pin location lookup failed:', error);
           setMapStatus(
-            'PIN PLOTTED. AUTOMATIC LOCATION LOOKUP IS CURRENTLY UNAVAILABLE; YOU MAY COMPLETE SECTION 1 MANUALLY.'
+            'PIN PLOTTED. AUTOMATIC LOCATION LOOKUP IS CURRENTLY UNAVAILABLE; YOU MAY COMPLETE SECTION 5 MANUALLY.'
           );
           setDeviceLocationStatus_(
             'The pin coordinates were captured, but the administrative location could not be identified automatically.',
@@ -6662,12 +6730,15 @@
       syncHeightHidden();
       syncCustomPosition_();
 
+      const maintenance = isMaintenanceMode_();
       const referencesValid = validateReferenceSelections(false);
-      const timelineValid = validateTimelineClient();
-      const rainIntensityValid = validateRainIntensity_(false);
+      // Usual maintenance activity: timeline, rain intensity, cause of
+      // flooding, and BEFORE/DURING/AFTER statuses are intentionally blank.
+      const timelineValid = maintenance ? true : validateTimelineClient();
+      const rainIntensityValid = maintenance ? true : validateRainIntensity_(false);
       const heightsValid = validateHeights(false);
-      const choicesValid = validateChoiceGroups(false);
-      const statusesValid = validateResponseStatus_(false);
+      const choicesValid = maintenance ? validateInterventionsOnly_() : validateChoiceGroups(false);
+      const statusesValid = maintenance ? true : validateResponseStatus_(false);
       const photosValid = validatePhotos(false);
       const htmlValid = form.checkValidity();
       markAllInvalidFields();
@@ -6844,6 +6915,115 @@
 
     console.info('FMR_FRONTEND_BUILD_V26_HUC_CITY_FIRST_DEFAULTS');
 
+    /* ================= USUAL MAINTENANCE ACTIVITY MODE ================= */
+    function isMaintenanceMode_() { return Boolean(appState.maintenanceMode); }
+
+    function validateInterventionsOnly_() {
+      const interventionSelected = Boolean(document.querySelector('.intervention-choice:checked'));
+      setChoiceGroupInvalid('cause', false);
+      setChoiceGroupInvalid('intervention', !interventionSelected);
+      return interventionSelected;
+    }
+
+    function clearTimelineForMaintenance_() {
+      ['rain_start', 'rain_end', 'flood_start', 'flood_end'].forEach(function (id) {
+        const field = document.getElementById(id);
+        const trigger = document.getElementById(id + '_trigger');
+        if (field) field.value = '';
+        if (trigger) {
+          const label = trigger.querySelector('.dt-value');
+          if (label) label.textContent = 'Select date & time';
+          trigger.classList.remove('filled', 'glow');
+        }
+      });
+      updateTimelineConstraints();
+    }
+
+    function setRainIntensityValue_(value) {
+      const normalized = upper(value);
+      document.querySelectorAll('.intensity-btn').forEach(function (button) {
+        const active = Boolean(normalized) && upper(button.getAttribute('data-intensity')) === normalized;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      document.getElementById('rain_intensity').value = normalized;
+      document.getElementById('intensityGroup').classList.remove('choice-invalid');
+    }
+
+    function setHeightValuesCm_(maxCm, afterCm) {
+      document.getElementById('max_flood').value = String(maxCm);
+      document.getElementById('after_height').value = String(afterCm);
+      onHeightInput('max_flood');
+      onHeightInput('after_height');
+      validateHeights(false);
+    }
+
+    function setMaintenanceMode_(enabled) {
+      const on = Boolean(enabled);
+      if (on === isMaintenanceMode_()) return;
+      const form = document.getElementById('floodForm');
+      const toggle = document.getElementById('maintenanceToggle');
+
+      if (on) {
+        // Remember what was there so turning the switch off brings it back.
+        appState.maintenanceRestore = {
+          intensity: document.getElementById('rain_intensity').value || 'LIGHT',
+          maxFlood: document.getElementById('max_flood').value,
+          afterHeight: document.getElementById('after_height').value,
+          statuses: {
+            before: getSelectedResponseStatuses_('before'),
+            during: getSelectedResponseStatuses_('during'),
+            after: getSelectedResponseStatuses_('after')
+          }
+        };
+
+        // Section 1: blank timeline and rain intensity.
+        clearTimelineForMaintenance_();
+        setRainIntensityValue_('');
+
+        // Section 2: flood height is 0. The level after intervention must
+        // not exceed it, so Section 4's after-intervention level is 0 too.
+        setHeightValuesCm_(0, 0);
+
+        // Section 3: blank cause of flooding.
+        document.querySelectorAll('.cause-choice').forEach(function (box) { box.checked = false; });
+        handleChoiceChange('cause', null);
+        setChoiceGroupInvalid('cause', false);
+
+        // Section 6: blank BEFORE / DURING / AFTER status buttons.
+        ['before', 'during', 'after'].forEach(function (stage) {
+          setResponseStatusSelections_(stage, []);
+          const grid = document.querySelector('.response-status-grid[data-response-status-panel="' + stage + '"]');
+          if (grid) grid.classList.remove('status-invalid');
+        });
+      } else {
+        const saved = appState.maintenanceRestore || {};
+        setRainIntensityValue_(saved.intensity || 'LIGHT');
+        const savedMax = parseNumber(saved.maxFlood);
+        setHeightValuesCm_(savedMax && savedMax > 0 ? savedMax : 15, 0);
+        const statuses = saved.statuses || {};
+        const hasSavedStatuses = ['before', 'during', 'after'].some(function (stage) {
+          return statuses[stage] && statuses[stage].length;
+        });
+        if (hasSavedStatuses) {
+          ['before', 'during', 'after'].forEach(function (stage) { setResponseStatusSelections_(stage, statuses[stage] || []); });
+        } else {
+          initializeResponseStatusDefaults_();
+        }
+        updateTimelineConstraints();
+      }
+
+      appState.maintenanceMode = on;
+      form.classList.toggle('maintenance-mode', on);
+      toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+      document.getElementById('report_type').value = on ? 'MAINTENANCE' : 'FLOOD';
+      document.querySelectorAll('[data-maint-lock]').forEach(function (element) {
+        if (on) element.setAttribute('inert', '');
+        else element.removeAttribute('inert');
+      });
+      hideError();
+    }
+
     function setFormBootstrapLocked_(locked) {
       const form = document.getElementById('floodForm');
       if (!form) return;
@@ -6851,8 +7031,13 @@
       form.classList.toggle('form-bootstrap-lock', shouldLock);
       form.classList.toggle('form-bootstrap-ready', !shouldLock);
       form.setAttribute('aria-busy', shouldLock ? 'true' : 'false');
-      if (shouldLock) form.setAttribute('inert', '');
-      else form.removeAttribute('inert');
+      form.removeAttribute('inert');
+      // Sections 1-2 (timeline + height) never wait for the server, so the
+      // user can start right away. The rest unlocks once reference data loads.
+      Array.from(form.children).forEach(function (child) {
+        if (shouldLock && !child.classList.contains('sec23-row')) child.setAttribute('inert', '');
+        else child.removeAttribute('inert');
+      });
     }
 
     function finishSilentBootstrap_() {
